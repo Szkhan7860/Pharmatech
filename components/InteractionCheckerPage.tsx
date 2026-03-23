@@ -1,31 +1,8 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ShieldAlert, AlertTriangle, Info, CheckCircle2, Search, ArrowRight, Pill } from 'lucide-react';
 import { checkDrugInteractions } from '../services/geminiService';
 import { InteractionResult, InteractionSeverity } from '../types';
-
-// Icon components for different severity levels
-const SevereIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-    </svg>
-);
-
-const ModerateIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-
-const MildIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-
-const NoneIcon: React.FC = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
 
 const InteractionCheckerPage: React.FC = () => {
   const [drug1, setDrug1] = useState('');
@@ -56,88 +33,189 @@ const InteractionCheckerPage: React.FC = () => {
     switch (severity) {
       case 'Severe':
         return {
-          styles: 'bg-red-100 dark:bg-red-900/50 border-red-500 text-red-800 dark:text-red-200',
-          icon: <SevereIcon />,
+          bg: 'bg-rose-50 dark:bg-rose-900/20',
+          border: 'border-rose-500',
+          text: 'text-rose-700 dark:text-rose-400',
+          accent: 'bg-rose-500',
+          icon: <ShieldAlert className="w-10 h-10" />,
         };
       case 'Moderate':
         return {
-          styles: 'bg-orange-100 dark:bg-orange-900/50 border-orange-500 text-orange-800 dark:text-orange-200',
-          icon: <ModerateIcon />,
+          bg: 'bg-amber-50 dark:bg-amber-900/20',
+          border: 'border-amber-500',
+          text: 'text-amber-700 dark:text-amber-400',
+          accent: 'bg-amber-500',
+          icon: <AlertTriangle className="w-10 h-10" />,
         };
       case 'Mild':
         return {
-          styles: 'bg-yellow-100 dark:bg-yellow-900/50 border-yellow-500 text-yellow-800 dark:text-yellow-200',
-          icon: <MildIcon />,
+          bg: 'bg-blue-50 dark:bg-blue-900/20',
+          border: 'border-blue-500',
+          text: 'text-blue-700 dark:text-blue-400',
+          accent: 'bg-blue-500',
+          icon: <Info className="w-10 h-10" />,
         };
       case 'None':
         return {
-          styles: 'bg-green-100 dark:bg-green-900/50 border-green-500 text-green-800 dark:text-green-200',
-          icon: <NoneIcon />,
+          bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+          border: 'border-emerald-500',
+          text: 'text-emerald-700 dark:text-emerald-400',
+          accent: 'bg-emerald-500',
+          icon: <CheckCircle2 className="w-10 h-10" />,
         };
       default:
         return {
-          styles: 'bg-gray-200 dark:bg-gray-700 border-gray-500 text-gray-800 dark:text-gray-200',
-          icon: null,
+          bg: 'bg-gray-50 dark:bg-gray-900/20',
+          border: 'border-gray-500',
+          text: 'text-gray-700 dark:text-gray-400',
+          accent: 'bg-gray-500',
+          icon: <Search className="w-10 h-10" />,
         };
     }
   };
   
   const ResultCard: React.FC<{ result: InteractionResult }> = ({ result }) => {
-    const { styles, icon } = getSeverityInfo(result.severity);
+    const { bg, border, text, accent, icon } = getSeverityInfo(result.severity);
     return (
-      <div className={`mt-8 w-full max-w-3xl rounded-lg shadow-xl p-6 border-l-8 ${styles} animate-fade-in text-left`}>
-        <div className="flex items-center mb-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className={`mt-8 md:mt-12 w-full max-w-3xl rounded-2xl md:rounded-[2rem] shadow-2xl p-6 md:p-8 border-2 ${border} ${bg} relative overflow-hidden`}
+      >
+        <div className={`absolute top-0 right-0 w-32 h-32 ${accent} opacity-5 rounded-full -mr-16 -mt-16`} />
+        
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 relative z-10">
+          <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl ${accent} bg-opacity-10 dark:bg-opacity-20 ${text}`}>
             {icon}
+          </div>
+          <div className="flex-grow space-y-3 md:space-y-4 text-center md:text-left">
             <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wider opacity-80">Interaction Severity</h3>
-                <p className="text-2xl font-bold">{result.severity}</p>
+              <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${text} opacity-70`}>Analysis Result</span>
+              <h3 className={`text-2xl md:text-3xl font-black ${text}`}>{result.severity} Interaction</h3>
             </div>
+            <p className="text-base md:text-lg text-gray-900 dark:text-gray-100 leading-relaxed font-medium">
+              {result.description}
+            </p>
+            <div className="pt-2 md:pt-4 flex flex-wrap justify-center md:justify-start gap-3 md:gap-4">
+              <div className="px-3 py-1.5 md:px-4 md:py-2 bg-white/50 dark:bg-black/40 rounded-lg md:rounded-xl border border-white/20 dark:border-white/10 text-xs md:text-sm font-bold flex items-center space-x-2">
+                <Pill className="w-3 h-3 md:w-4 md:h-4" />
+                <span>{result.drugs[0]}</span>
+              </div>
+              <div className="px-3 py-1.5 md:px-4 md:py-2 bg-white/50 dark:bg-black/40 rounded-lg md:rounded-xl border border-white/20 dark:border-white/10 text-xs md:text-sm font-bold flex items-center space-x-2">
+                <Pill className="w-3 h-3 md:w-4 md:h-4" />
+                <span>{result.drugs[1]}</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <p className="text-lg">{result.description}</p>
-      </div>
+      </motion.div>
     );
   };
 
 
   return (
-    <div className="flex flex-col items-center text-center px-4">
-      <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-2">Drug Interaction Checker</h1>
-      <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl">Enter two drug names to check for potential harmful interactions.</p>
-      
-      <form onSubmit={handleCheck} className="w-full max-w-xl space-y-4">
-        <input
-          type="text"
-          value={drug1}
-          onChange={(e) => setDrug1(e.target.value)}
-          placeholder="Enter first drug name"
-          className="w-full bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg p-4 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-cyan-500"
-          aria-label="First drug name"
-        />
-        <input
-          type="text"
-          value={drug2}
-          onChange={(e) => setDrug2(e.target.value)}
-          placeholder="Enter second drug name"
-          className="w-full bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg p-4 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-cyan-500"
-          aria-label="Second drug name"
-        />
-        <button
-          type="submit"
-          disabled={isLoading || !drug1.trim() || !drug2.trim()}
-          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 disabled:bg-gray-500 dark:disabled:bg-gray-600 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/30"
-          aria-label="Check for interactions"
+    <div className="max-w-5xl mx-auto px-4 py-8 md:py-12">
+      <div className="text-center space-y-4 md:space-y-6 mb-8 md:mb-16">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight"
         >
-          {isLoading ? (
-            <svg className="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          ) : 'Check Interactions'}
-        </button>
-      </form>
+          Drug Interaction <span className="text-rose-600 dark:text-rose-500">Checker</span>
+        </motion.h1>
+        <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+          Ensure patient safety by identifying potential contraindications between multiple medications using our clinical AI engine.
+        </p>
+      </div>
       
-      {error && <p className="mt-4 text-red-500 dark:text-red-400">{error}</p>}
-      {interactionResult && <ResultCard result={interactionResult} />}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white dark:bg-gray-900 p-6 md:p-12 rounded-2xl md:rounded-[2.5rem] shadow-2xl border border-gray-200 dark:border-gray-800 relative overflow-hidden"
+      >
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-500 to-orange-600" />
+        
+        <form onSubmit={handleCheck} className="space-y-6 md:space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Medication A</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-rose-500 transition-colors">
+                  <Pill className="w-5 h-5" />
+                </div>
+                <input
+                  type="text"
+                  value={drug1}
+                  onChange={(e) => setDrug1(e.target.value)}
+                  placeholder="e.g. Warfarin"
+                  className="w-full bg-gray-50 dark:bg-black border-2 border-transparent focus:border-rose-500 rounded-xl md:rounded-2xl p-4 pl-12 text-gray-900 dark:text-white placeholder-gray-500 outline-none transition-all"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Medication B</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-rose-500 transition-colors">
+                  <Pill className="w-5 h-5" />
+                </div>
+                <input
+                  type="text"
+                  value={drug2}
+                  onChange={(e) => setDrug2(e.target.value)}
+                  placeholder="e.g. Aspirin"
+                  className="w-full bg-gray-50 dark:bg-black border-2 border-transparent focus:border-rose-500 rounded-xl md:rounded-2xl p-4 pl-12 text-gray-900 dark:text-white placeholder-gray-500 outline-none transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading || !drug1.trim() || !drug2.trim()}
+            className="w-full bg-rose-600 hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-600 text-white font-black py-4 md:py-5 px-8 rounded-xl md:rounded-2xl transition-all duration-300 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:cursor-not-allowed flex items-center justify-center space-x-3 shadow-xl shadow-rose-600/20 transform hover:scale-[1.01] active:scale-[0.99]"
+          >
+            {isLoading ? (
+              <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                <Search className="w-6 h-6" />
+                <span className="text-lg">Analyze Interactions</span>
+                <ArrowRight className="w-5 h-5" />
+              </>
+            )}
+          </button>
+        </form>
+      </motion.div>
+      
+      <AnimatePresence>
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="mt-8 p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-2xl border border-rose-100 dark:border-rose-900/30 text-center font-bold"
+          >
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-col items-center">
+        <AnimatePresence>
+          {interactionResult && <ResultCard result={interactionResult} />}
+        </AnimatePresence>
+      </div>
+
+      <div className="mt-12 md:mt-16 p-6 md:p-8 bg-gray-100 dark:bg-gray-900/50 rounded-2xl md:rounded-3xl border border-gray-200 dark:border-gray-800 flex items-start space-x-4">
+        <Info className="w-6 h-6 text-rose-600 dark:text-rose-500 shrink-0 mt-1" />
+        <div className="space-y-2">
+          <h4 className="font-bold text-gray-900 dark:text-white">Clinical Note</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Our interaction checker uses advanced AI to synthesize data from multiple clinical sources. However, it is not exhaustive. Always consult the official Prescribing Information (PI) and a licensed pharmacist for definitive guidance.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

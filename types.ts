@@ -1,6 +1,7 @@
 export enum Page {
   Home = 'Home',
   InteractionChecker = 'InteractionChecker',
+  DoseCalculator = 'DoseCalculator',
   Blog = 'Blog',
   Contact = 'Contact',
 }

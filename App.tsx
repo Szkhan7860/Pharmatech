@@ -3,6 +3,7 @@ import { Page } from './types';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
 import InteractionCheckerPage from './components/InteractionCheckerPage';
+import DoseCalculatorPage from './components/DoseCalculatorPage';
 import BlogPage from './components/BlogPage';
 import ContactPage from './components/ContactPage';
 import Footer from './components/Footer';
@@ -16,6 +17,8 @@ const App: React.FC = () => {
         return <HomePage setCurrentPage={setCurrentPage} />;
       case Page.InteractionChecker:
         return <InteractionCheckerPage />;
+      case Page.DoseCalculator:
+        return <DoseCalculatorPage />;
       case Page.Blog:
         return <BlogPage />;
       case Page.Contact:

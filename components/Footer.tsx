@@ -21,7 +21,7 @@ const Footer: React.FC<FooterProps> = ({ currentPage, setCurrentPage }) => {
     }> = ({ page, children }) => (
       <button
         onClick={() => navigateTo(page)}
-        className="text-gray-400 hover:text-white transition-colors duration-200"
+        className="text-gray-500 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors duration-200 font-medium"
       >
         {children}
       </button>
@@ -33,7 +33,7 @@ const Footer: React.FC<FooterProps> = ({ currentPage, setCurrentPage }) => {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={label}
-            className="text-gray-400 hover:text-cyan-400 hover:scale-110 transform transition-all duration-200"
+            className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-gray-500 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:scale-110 transform transition-all duration-200 shadow-sm"
         >
             {children}
         </a>
@@ -68,30 +68,57 @@ const Footer: React.FC<FooterProps> = ({ currentPage, setCurrentPage }) => {
 
 
     return (
-        <footer className="bg-gray-800 text-gray-400">
-            <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0">
-                    <div className="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="font-bold text-xl text-white">PharmaTech Hub</span>
+        <footer className="bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
+            <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                    <div className="col-span-1 md:col-span-2 space-y-8">
+                        <div className="flex items-center space-x-3">
+                            <div className="p-2.5 bg-cyan-600 rounded-xl shadow-lg shadow-cyan-600/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <span className="font-black text-2xl tracking-tighter text-gray-900 dark:text-white">PharmaTech <span className="text-cyan-600">Hub</span></span>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-400 max-w-sm leading-relaxed text-lg font-medium">
+                            Empowering healthcare professionals and students with cutting-edge pharmaceutical insights and digital tools.
+                        </p>
+                        <div className="flex flex-wrap gap-4">
+                            <SocialIcon href="https://github.com/szkhan7860" label="GitHub"><GitHubIcon /></SocialIcon>
+                            <SocialIcon href="https://instagram.com/Shahnawaz._.2006" label="Instagram"><InstagramIcon /></SocialIcon>
+                            <SocialIcon href="https://t.me/sukuna_verified" label="Telegram"><TelegramIcon /></SocialIcon>
+                            <SocialIcon href="mailto:szcamps@gmail.com" label="Gmail"><GmailIcon /></SocialIcon>
+                        </div>
                     </div>
-                    <div className="flex space-x-6">
-                        <FooterLink page={Page.Home}>Home</FooterLink>
-                        <FooterLink page={Page.InteractionChecker}>Checker</FooterLink>
-                        <FooterLink page={Page.Blog}>Blog</FooterLink>
-                        <FooterLink page={Page.Contact}>Contact</FooterLink>
+                    
+                    <div className="space-y-6">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Platform</h3>
+                        <ul className="space-y-4">
+                            <li><FooterLink page={Page.Home}>Home</FooterLink></li>
+                            <li><FooterLink page={Page.InteractionChecker}>Interaction Checker</FooterLink></li>
+                            <li><FooterLink page={Page.DoseCalculator}>Dose Calculator</FooterLink></li>
+                        </ul>
                     </div>
-                    <div className="flex space-x-6">
-                        <SocialIcon href="https://github.com/szkhan7860" label="GitHub"><GitHubIcon /></SocialIcon>
-                        <SocialIcon href="https://instagram.com/Shahnawaz._.2006" label="Instagram"><InstagramIcon /></SocialIcon>
-                        <SocialIcon href="https://t.me/sukuna_verified" label="Telegram"><TelegramIcon /></SocialIcon>
-                        <SocialIcon href="mailto:szcamps@gmail.com" label="Gmail"><GmailIcon /></SocialIcon>
+
+                    <div className="space-y-6">
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Support</h3>
+                        <ul className="space-y-4">
+                            <li><FooterLink page={Page.Blog}>Blog Hub</FooterLink></li>
+                            <li><FooterLink page={Page.Contact}>Contact Us</FooterLink></li>
+                            <li><button className="text-gray-500 dark:text-gray-400 hover:text-cyan-600 transition-colors font-medium">Privacy Policy</button></li>
+                        </ul>
                     </div>
                 </div>
-                <div className="mt-8 pt-8 border-t border-gray-700 text-center">
-                    <p className="text-base">&copy; 2025 PharmaTech Hub. All rights reserved.</p>
+                
+                <div className="pt-8 border-t border-gray-100 dark:border-gray-900 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0 text-center md:text-left">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        &copy; 2025 PharmaTech Hub. Crafted for the future of pharmacy.
+                    </p>
+                    <div className="flex items-center space-x-2 text-sm text-gray-400 font-medium">
+                        <span>Built with</span>
+                        <svg className="h-4 w-4 text-rose-500 fill-current" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" /></svg>
+                        <span>by the PharmaTech Team</span>
+                    </div>
                 </div>
             </div>
         </footer>
