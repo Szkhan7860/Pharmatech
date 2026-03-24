@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { DrugInfo, InteractionResult, SymptomSuggestion, QuizQuestion } from '../types';
+import { VERIFIED_DRUGS } from '../constants/verifiedDrugs';
 
 if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable is not set.");
@@ -97,6 +98,14 @@ const quizQuestionSchema = {
 };
 
 export const getDrugInfo = async (drugName: string): Promise<DrugInfo> => {
+  // Check verified drugs first
+  const verifiedDrug = VERIFIED_DRUGS.find(
+    (d) => d.name.toLowerCase() === drugName.toLowerCase()
+  );
+  if (verifiedDrug) {
+    return verifiedDrug;
+  }
+
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -165,5 +174,36 @@ export const generateQuizQuestions = async (topic: string = 'Pharmacology'): Pro
   } catch (error) {
     console.error('Error generating quiz questions:', error);
     throw new Error('Failed to generate quiz questions from the API.');
+  }
+};
+
+export const analyzePrescriptionImage = async (base64Image: string, mimeType: string): Promise<DrugInfo[]> => {
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.1-pro-preview',
+      contents: [
+        {
+          inlineData: {
+            data: base64Image,
+            mimeType: mimeType,
+          },
+        },
+        {
+          text: 'Analyze this prescription image and extract information about the medications. For each medication, provide its name, common uses, and recommended dosage. Ensure the output strictly follows the provided JSON schema.',
+        },
+      ],
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.ARRAY,
+          items: drugInfoSchema,
+        },
+      },
+    });
+    const jsonText = response.text.trim();
+    return JSON.parse(jsonText);
+  } catch (error) {
+    console.error('Error analyzing prescription image:', error);
+    throw new Error('Failed to analyze prescription image. Please ensure it is a clear photo of a prescription.');
   }
 };

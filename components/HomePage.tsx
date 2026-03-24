@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Pill, ShieldAlert, BookOpen, Mail, ArrowRight, Calculator, Activity, GraduationCap, Star } from 'lucide-react';
+import { Search, Pill, ShieldAlert, BookOpen, Mail, ArrowRight, Calculator, Activity, GraduationCap, Star, Camera } from 'lucide-react';
 import { getDrugInfo } from '../services/geminiService';
 import { DrugInfo, Page } from '../types';
 import { auth, db } from '../firebase';
@@ -156,6 +156,7 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
                 <Star className={`w-6 h-6 md:w-8 md:h-8 ${isBookmarked ? 'fill-current' : ''}`} />
               </button>
             </div>
+            <p className="text-[10px] font-bold text-gray-400 italic mt-1">Based on standard clinical guidelines. Verify with official pharmacopoeia.</p>
           </div>
           <div className="self-start md:self-center flex items-center space-x-3 px-6 py-3 bg-cyan-50 dark:bg-cyan-900/30 rounded-2xl text-cyan-600 dark:text-cyan-400 font-black uppercase tracking-widest text-xs">
             <Pill className="w-5 h-5" />
@@ -357,6 +358,13 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
             title="Quiz Mode"
             description="Test your pharmacology knowledge with AI-generated MCQs and clinical scenarios."
             color="bg-purple-600"
+          />
+          <FeatureCard 
+            onClick={() => setCurrentPage(Page.PrescriptionScanner)}
+            icon={<Camera />}
+            title="Prescription Scanner"
+            description="Scan and analyze handwritten or printed prescriptions with AI-powered OCR technology."
+            color="bg-indigo-600"
           />
           <FeatureCard 
             onClick={() => setCurrentPage(Page.Blog)}

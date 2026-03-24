@@ -11,6 +11,9 @@ import ContactPage from './components/ContactPage';
 import AuthPage from './components/AuthPage';
 import ProfilePage from './components/ProfilePage';
 import AdminPanel from './components/AdminPanel';
+import AboutPage from './components/AboutPage';
+import HistoryPage from './components/HistoryPage';
+import PrescriptionScannerPage from './components/PrescriptionScannerPage';
 import Footer from './components/Footer';
 
 const App: React.FC = () => {
@@ -38,6 +41,12 @@ const App: React.FC = () => {
         return <ProfilePage setCurrentPage={setCurrentPage} />;
       case Page.AdminPanel:
         return <AdminPanel setCurrentPage={setCurrentPage} />;
+      case Page.About:
+        return <AboutPage />;
+      case Page.History:
+        return <HistoryPage setCurrentPage={setCurrentPage} />;
+      case Page.PrescriptionScanner:
+        return <PrescriptionScannerPage />;
       default:
         return <HomePage setCurrentPage={setCurrentPage} />;
     }

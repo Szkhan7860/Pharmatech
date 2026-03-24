@@ -9,6 +9,9 @@ export enum Page {
   Auth = 'Auth',
   Profile = 'Profile',
   AdminPanel = 'AdminPanel',
+  About = 'About',
+  History = 'History',
+  PrescriptionScanner = 'PrescriptionScanner',
 }
 
 export interface DrugInfo {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldAlert, AlertTriangle, Info, CheckCircle2, Search, ArrowRight, Pill } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, Info, CheckCircle2, Search, ArrowRight, Pill, Share2, Check } from 'lucide-react';
 import { checkDrugInteractions } from '../services/geminiService';
 import { InteractionResult, InteractionSeverity } from '../types';
 
@@ -10,6 +10,15 @@ const InteractionCheckerPage: React.FC = () => {
   const [interactionResult, setInteractionResult] = useState<InteractionResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCopyToast, setShowCopyToast] = useState(false);
+
+  const handleShare = (result: InteractionResult) => {
+    const text = `Interaction between ${result.drugs[0]} and ${result.drugs[1]} is ${result.severity}: ${result.description}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setShowCopyToast(true);
+      setTimeout(() => setShowCopyToast(false), 3000);
+    });
+  };
 
   const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,9 +98,19 @@ const InteractionCheckerPage: React.FC = () => {
             {icon}
           </div>
           <div className="flex-grow space-y-3 md:space-y-4 text-center md:text-left">
-            <div>
-              <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${text} opacity-70`}>Analysis Result</span>
-              <h3 className={`text-2xl md:text-3xl font-black ${text}`}>{result.severity} Interaction</h3>
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <div>
+                <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${text} opacity-70`}>Analysis Result</span>
+                <h3 className={`text-2xl md:text-3xl font-black ${text}`}>{result.severity} Interaction</h3>
+                <p className="text-[10px] font-bold text-gray-400 italic mt-1">Based on standard clinical guidelines. Verify with official pharmacopoeia.</p>
+              </div>
+              <button
+                onClick={() => handleShare(result)}
+                className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all transform hover:scale-105 active:scale-95 shadow-lg ${accent} text-white hover:brightness-110`}
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share Result</span>
+              </button>
             </div>
             <p className="text-base md:text-lg text-gray-900 dark:text-gray-100 leading-relaxed font-medium">
               {result.description}
@@ -206,6 +225,22 @@ const InteractionCheckerPage: React.FC = () => {
           {interactionResult && <ResultCard result={interactionResult} />}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {showCopyToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center space-x-3 px-6 py-4 bg-emerald-600 text-white rounded-2xl shadow-2xl shadow-emerald-600/30 border border-emerald-500/50"
+          >
+            <div className="p-1.5 bg-white/20 rounded-lg">
+              <Check className="w-5 h-5" />
+            </div>
+            <span className="font-black text-sm uppercase tracking-widest">Result Copied to Clipboard!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="mt-12 md:mt-16 p-6 md:p-8 bg-gray-100 dark:bg-gray-900/50 rounded-2xl md:rounded-3xl border border-gray-200 dark:border-gray-800 flex items-start space-x-4">
         <Info className="w-6 h-6 text-rose-600 dark:text-rose-500 shrink-0 mt-1" />

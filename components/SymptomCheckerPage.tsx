@@ -9,10 +9,26 @@ const SymptomCheckerPage: React.FC = () => {
   const [suggestion, setSuggestion] = useState<SymptomSuggestion | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emergencyWarning, setEmergencyWarning] = useState<string | null>(null);
+
+  const EMERGENCY_KEYWORDS = [
+    'chest pain', 'severe bleeding', 'difficulty breathing', 'shortness of breath',
+    'stroke symptoms', 'severe allergic reaction', 'unconscious', 'seizure',
+    'poisoning', 'overdose', 'suicidal thoughts', 'severe burns'
+  ];
 
   const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!symptoms.trim()) return;
+
+    setEmergencyWarning(null);
+    const lowerSymptoms = symptoms.toLowerCase();
+    const hasEmergency = EMERGENCY_KEYWORDS.some(keyword => lowerSymptoms.includes(keyword));
+
+    if (hasEmergency) {
+      setEmergencyWarning('🚨 EMERGENCY: These symptoms may indicate a life-threatening condition. Please seek immediate medical attention or call emergency services (911/999) now.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -95,6 +111,29 @@ const SymptomCheckerPage: React.FC = () => {
         )}
 
         <AnimatePresence>
+          {emergencyWarning && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-8 p-8 bg-rose-600 text-white rounded-[2rem] shadow-2xl shadow-rose-600/30 border-2 border-rose-500 flex flex-col items-center text-center space-y-4"
+            >
+              <ShieldAlert className="w-16 h-16 animate-pulse" />
+              <h3 className="text-2xl font-black">Immediate Action Required</h3>
+              <p className="text-lg font-medium leading-relaxed">
+                {emergencyWarning}
+              </p>
+              <button 
+                onClick={() => setEmergencyWarning(null)}
+                className="px-6 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-bold transition-colors"
+              >
+                Dismiss Warning
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
           {suggestion && (
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -110,6 +149,7 @@ const SymptomCheckerPage: React.FC = () => {
                     <div className="space-y-1 md:space-y-2">
                       <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-cyan-600">Analysis Results</span>
                       <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight">Suggested Medications</h2>
+                      <p className="text-xs font-bold text-gray-400 italic">Based on standard clinical guidelines. Verify with official pharmacopoeia.</p>
                     </div>
                   </div>
 

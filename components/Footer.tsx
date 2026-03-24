@@ -112,12 +112,12 @@ const Footer: React.FC<FooterProps> = ({ currentPage, setCurrentPage }) => {
                 
                 <div className="pt-8 border-t border-gray-100 dark:border-gray-900 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0 text-center md:text-left">
                     <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                        &copy; 2025 PharmaTech Hub. Crafted for the future of pharmacy.
+                        &copy; 2026 PharmaTech Hub. Crafted for the future of pharmacy.
                     </p>
                     <div className="flex items-center space-x-2 text-sm text-gray-400 font-medium">
                         <span>Built with</span>
                         <svg className="h-4 w-4 text-rose-500 fill-current" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" /></svg>
-                        <span>by the PharmaTech Team</span>
+                        <span>by Mohd Shahnawaz</span>
                     </div>
                 </div>
             </div>
