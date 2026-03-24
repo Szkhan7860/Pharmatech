@@ -1,0 +1,124 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Stores user profile information.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique identifier of the user."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The email address of the user."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the user."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL of the user's profile photo."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user"],
+          "description": "The role of the user."
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "Bookmark": {
+      "title": "Bookmark",
+      "description": "Stores bookmarked drug information.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who bookmarked the drug."
+        },
+        "drugName": {
+          "type": "string",
+          "description": "The name of the bookmarked drug."
+        },
+        "drugData": {
+          "type": "object",
+          "description": "The full data of the drug at the time of bookmarking."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the bookmark was created."
+        }
+      },
+      "required": ["userId", "drugName", "timestamp"]
+    },
+    "SearchHistory": {
+      "title": "SearchHistory",
+      "description": "Stores user search history.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who performed the search."
+        },
+        "drugName": {
+          "type": "string",
+          "description": "The name of the drug searched."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the search was performed."
+        }
+      },
+      "required": ["userId", "drugName", "timestamp"]
+    },
+    "QuizResult": {
+      "title": "QuizResult",
+      "description": "Stores user quiz performance.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who took the quiz."
+        },
+        "score": {
+          "type": "integer",
+          "description": "The score achieved."
+        },
+        "totalQuestions": {
+          "type": "integer",
+          "description": "The total number of questions in the quiz."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the quiz was completed."
+        }
+      },
+      "required": ["userId", "score", "totalQuestions", "timestamp"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Collection of user profiles."
+    },
+    "bookmarks/{bookmarkId}": {
+      "schema": "Bookmark",
+      "description": "Collection of user bookmarks."
+    },
+    "search_history/{searchId}": {
+      "schema": "SearchHistory",
+      "description": "Collection of search history entries."
+    },
+    "quiz_results/{resultId}": {
+      "schema": "QuizResult",
+      "description": "Collection of quiz results."
+    }
+  }
+}

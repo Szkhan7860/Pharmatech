@@ -33,43 +33,43 @@ const InteractionCheckerPage: React.FC = () => {
     switch (severity) {
       case 'Severe':
         return {
-          bg: 'bg-rose-50 dark:bg-rose-900/20',
+          bg: 'bg-rose-50 dark:bg-rose-950/40',
           border: 'border-rose-500',
-          text: 'text-rose-700 dark:text-rose-400',
+          text: 'text-rose-800 dark:text-rose-300',
           accent: 'bg-rose-500',
-          icon: <ShieldAlert className="w-10 h-10" />,
+          icon: <ShieldAlert className="w-8 h-8 md:w-10 md:h-10" />,
         };
       case 'Moderate':
         return {
-          bg: 'bg-amber-50 dark:bg-amber-900/20',
+          bg: 'bg-amber-50 dark:bg-amber-950/40',
           border: 'border-amber-500',
-          text: 'text-amber-700 dark:text-amber-400',
+          text: 'text-amber-800 dark:text-amber-300',
           accent: 'bg-amber-500',
-          icon: <AlertTriangle className="w-10 h-10" />,
+          icon: <AlertTriangle className="w-8 h-8 md:w-10 md:h-10" />,
         };
       case 'Mild':
         return {
-          bg: 'bg-blue-50 dark:bg-blue-900/20',
+          bg: 'bg-blue-50 dark:bg-blue-950/40',
           border: 'border-blue-500',
-          text: 'text-blue-700 dark:text-blue-400',
+          text: 'text-blue-800 dark:text-blue-300',
           accent: 'bg-blue-500',
-          icon: <Info className="w-10 h-10" />,
+          icon: <Info className="w-8 h-8 md:w-10 md:h-10" />,
         };
       case 'None':
         return {
-          bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+          bg: 'bg-emerald-50 dark:bg-emerald-950/40',
           border: 'border-emerald-500',
-          text: 'text-emerald-700 dark:text-emerald-400',
+          text: 'text-emerald-800 dark:text-emerald-300',
           accent: 'bg-emerald-500',
-          icon: <CheckCircle2 className="w-10 h-10" />,
+          icon: <CheckCircle2 className="w-8 h-8 md:w-10 md:h-10" />,
         };
       default:
         return {
-          bg: 'bg-gray-50 dark:bg-gray-900/20',
+          bg: 'bg-gray-50 dark:bg-gray-900/40',
           border: 'border-gray-500',
-          text: 'text-gray-700 dark:text-gray-400',
+          text: 'text-gray-800 dark:text-gray-300',
           accent: 'bg-gray-500',
-          icon: <Search className="w-10 h-10" />,
+          icon: <Search className="w-8 h-8 md:w-10 md:h-10" />,
         };
     }
   };
@@ -119,7 +119,7 @@ const InteractionCheckerPage: React.FC = () => {
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight"
+          className="text-3xl sm:text-4xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight leading-tight"
         >
           Drug Interaction <span className="text-rose-600 dark:text-rose-500">Checker</span>
         </motion.h1>
@@ -131,14 +131,14 @@ const InteractionCheckerPage: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-900 p-6 md:p-12 rounded-2xl md:rounded-[2.5rem] shadow-2xl border border-gray-200 dark:border-gray-800 relative overflow-hidden"
+        className="bg-white dark:bg-gray-900 p-5 sm:p-8 md:p-12 rounded-2xl md:rounded-[2.5rem] shadow-2xl border border-gray-200 dark:border-gray-800 relative overflow-hidden"
       >
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-500 to-orange-600" />
         
         <form onSubmit={handleCheck} className="space-y-6 md:space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Medication A</label>
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Medication A</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-rose-500 transition-colors">
                   <Pill className="w-5 h-5" />
@@ -154,7 +154,7 @@ const InteractionCheckerPage: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Medication B</label>
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-1">Medication B</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-rose-500 transition-colors">
                   <Pill className="w-5 h-5" />

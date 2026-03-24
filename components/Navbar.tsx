@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { User, LogIn, Menu, X, Pill, Activity, BookOpen, Calculator, MessageSquare, Home } from 'lucide-react';
 import { Page } from '../types';
 import ThemeSwitcher from './ThemeSwitcher';
+import { auth } from '../firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 
 interface NavbarProps {
   currentPage: Page;
@@ -13,11 +16,12 @@ const NavLink: React.FC<{
   currentPage: Page;
   setCurrentPage: (page: Page) => void;
   children: React.ReactNode;
+  icon?: React.ReactNode;
   isMobile?: boolean;
-}> = ({ page, currentPage, setCurrentPage, children, isMobile = false }) => {
+}> = ({ page, currentPage, setCurrentPage, children, icon, isMobile = false }) => {
   const isActive = currentPage === page;
-  const baseClasses = "font-bold transition-all duration-200";
-  const mobileClasses = `block px-4 py-3 rounded-xl text-lg ${isActive ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`;
+  const baseClasses = "font-bold transition-all duration-200 flex items-center space-x-2";
+  const mobileClasses = `w-full px-4 py-3 rounded-xl text-lg ${isActive ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}`;
   const desktopClasses = `px-4 py-2 rounded-xl text-sm ${isActive ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'}`;
 
   return (
@@ -26,52 +30,30 @@ const NavLink: React.FC<{
       className={`${baseClasses} ${isMobile ? mobileClasses : desktopClasses}`}
       aria-current={isActive ? 'page' : undefined}
     >
-      {children}
+      {icon && <span className={isMobile ? "w-6 h-6" : "w-4 h-4"}>{icon}</span>}
+      <span>{children}</span>
     </button>
   );
 };
 
-const HamburgerIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <button
-    onClick={onClick}
-    className="inline-flex items-center justify-center p-2 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none"
-    aria-controls="mobile-menu"
-  >
-    <span className="sr-only">Open main menu</span>
-    <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-  </button>
-);
-
-const CloseIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-    <button 
-        onClick={onClick} 
-        className="inline-flex items-center justify-center p-2 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none" 
-        aria-controls="mobile-menu" 
-    >
-        <span className="sr-only">Close main menu</span>
-        <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-    </button>
-);
-
-
 const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const navigateTo = (page: Page) => {
     if (page !== currentPage) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     setCurrentPage(page);
-  };
-  
-  const handleMobileLinkClick = (page: Page) => {
-    navigateTo(page);
     setIsMobileMenuOpen(false);
-  }
+  };
 
   return (
     <nav className="bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
@@ -80,29 +62,60 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage }) => {
           <div className="flex items-center">
             <button onClick={() => navigateTo(Page.Home)} className="flex-shrink-0 flex items-center space-x-3 text-gray-900 dark:text-white font-black text-2xl tracking-tighter transition-transform hover:scale-[1.02] active:scale-[0.98]">
                <div className="p-2 bg-cyan-600 rounded-xl shadow-lg shadow-cyan-600/20">
-                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                 </svg>
+                 <Pill className="h-6 w-6 text-white" />
                </div>
-               <span className="hidden sm:inline">PharmaTech <span className="text-cyan-600">Hub</span></span>
-               <span className="sm:hidden text-cyan-600">PTH</span>
+               <span className="hidden lg:inline">PharmaTech <span className="text-cyan-600">Hub</span></span>
+               <span className="lg:hidden text-cyan-600">PTH</span>
             </button>
           </div>
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-center space-x-2">
-              <NavLink page={Page.Home} currentPage={currentPage} setCurrentPage={navigateTo}>Home</NavLink>
-              <NavLink page={Page.InteractionChecker} currentPage={currentPage} setCurrentPage={navigateTo}>Checker</NavLink>
-              <NavLink page={Page.DoseCalculator} currentPage={currentPage} setCurrentPage={navigateTo}>Calculator</NavLink>
-              <NavLink page={Page.Blog} currentPage={currentPage} setCurrentPage={navigateTo}>Blog</NavLink>
-              <NavLink page={Page.Contact} currentPage={currentPage} setCurrentPage={navigateTo}>Contact</NavLink>
-              <div className="ml-4 pl-4 border-l border-gray-200 dark:border-gray-800">
+
+          <div className="hidden xl:block">
+            <div className="ml-10 flex items-center space-x-1">
+              <NavLink page={Page.Home} currentPage={currentPage} setCurrentPage={navigateTo} icon={<Home />}>Home</NavLink>
+              <NavLink page={Page.InteractionChecker} currentPage={currentPage} setCurrentPage={navigateTo} icon={<Activity />}>Checker</NavLink>
+              <NavLink page={Page.SymptomChecker} currentPage={currentPage} setCurrentPage={navigateTo} icon={<Activity />}>Symptoms</NavLink>
+              <NavLink page={Page.DoseCalculator} currentPage={currentPage} setCurrentPage={navigateTo} icon={<Calculator />}>Calculator</NavLink>
+              <NavLink page={Page.Quiz} currentPage={currentPage} setCurrentPage={navigateTo} icon={<BookOpen />}>Quiz</NavLink>
+              <NavLink page={Page.Blog} currentPage={currentPage} setCurrentPage={navigateTo} icon={<MessageSquare />}>Blog</NavLink>
+              <div className="ml-4 pl-4 border-l border-gray-200 dark:border-gray-800 flex items-center space-x-4">
                 <ThemeSwitcher />
+                {user ? (
+                  <button 
+                    onClick={() => navigateTo(Page.Profile)}
+                    className={`flex items-center space-x-2 p-1 pr-4 rounded-full border-2 transition-all ${currentPage === Page.Profile ? 'border-cyan-600 bg-cyan-50 dark:bg-cyan-900/20' : 'border-transparent hover:border-gray-200 dark:hover:border-gray-800'}`}
+                  >
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center text-white">
+                        <User className="w-5 h-5" />
+                      </div>
+                    )}
+                    <span className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[100px]">
+                      {user.displayName || 'Profile'}
+                    </span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => navigateTo(Page.Auth)}
+                    className="flex items-center space-x-2 bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-xl font-black text-sm transition-all shadow-lg shadow-cyan-600/20"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>Sign In</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
-          <div className="md:hidden flex items-center space-x-4">
+
+          <div className="xl:hidden flex items-center space-x-4">
             <ThemeSwitcher />
-            {isMobileMenuOpen ? <CloseIcon onClick={() => setIsMobileMenuOpen(false)} /> : <HamburgerIcon onClick={() => setIsMobileMenuOpen(true)} />}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
         </div>
       </div>
@@ -113,16 +126,44 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage }) => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 overflow-hidden"
-            id="mobile-menu"
+            className="xl:hidden bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 overflow-hidden"
           >
-              <div className="px-4 pt-2 pb-6 space-y-2">
-                <NavLink page={Page.Home} currentPage={currentPage} setCurrentPage={handleMobileLinkClick} isMobile={true}>Home</NavLink>
-                <NavLink page={Page.InteractionChecker} currentPage={currentPage} setCurrentPage={handleMobileLinkClick} isMobile={true}>Interaction Checker</NavLink>
-                <NavLink page={Page.DoseCalculator} currentPage={currentPage} setCurrentPage={handleMobileLinkClick} isMobile={true}>Dose Calculator</NavLink>
-                <NavLink page={Page.Blog} currentPage={currentPage} setCurrentPage={handleMobileLinkClick} isMobile={true}>Blog Hub</NavLink>
-                <NavLink page={Page.Contact} currentPage={currentPage} setCurrentPage={handleMobileLinkClick} isMobile={true}>Contact Us</NavLink>
+            <div className="px-4 pt-2 pb-6 space-y-2">
+              <NavLink page={Page.Home} currentPage={currentPage} setCurrentPage={navigateTo} isMobile icon={<Home />}>Home</NavLink>
+              <NavLink page={Page.InteractionChecker} currentPage={currentPage} setCurrentPage={navigateTo} isMobile icon={<Activity />}>Interaction Checker</NavLink>
+              <NavLink page={Page.SymptomChecker} currentPage={currentPage} setCurrentPage={navigateTo} isMobile icon={<Activity />}>Symptom Checker</NavLink>
+              <NavLink page={Page.DoseCalculator} currentPage={currentPage} setCurrentPage={navigateTo} isMobile icon={<Calculator />}>Dose Calculator</NavLink>
+              <NavLink page={Page.Quiz} currentPage={currentPage} setCurrentPage={navigateTo} isMobile icon={<BookOpen />}>Quiz Mode</NavLink>
+              <NavLink page={Page.Blog} currentPage={currentPage} setCurrentPage={navigateTo} isMobile icon={<MessageSquare />}>Blog Hub</NavLink>
+              <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                {user ? (
+                  <button 
+                    onClick={() => navigateTo(Page.Profile)}
+                    className="w-full flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900"
+                  >
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt="Profile" className="w-12 h-12 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-cyan-600 flex items-center justify-center text-white">
+                        <User className="w-6 h-6" />
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <p className="font-black text-gray-900 dark:text-white">{user.displayName || 'User'}</p>
+                      <p className="text-xs text-gray-500 font-bold">View Profile</p>
+                    </div>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => navigateTo(Page.Auth)}
+                    className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-black py-4 rounded-2xl transition-all flex items-center justify-center space-x-3"
+                  >
+                    <LogIn className="w-6 h-6" />
+                    <span className="text-lg">Sign In</span>
+                  </button>
+                )}
               </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

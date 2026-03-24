@@ -1,9 +1,14 @@
 export enum Page {
   Home = 'Home',
   InteractionChecker = 'InteractionChecker',
+  SymptomChecker = 'SymptomChecker',
   DoseCalculator = 'DoseCalculator',
+  Quiz = 'Quiz',
   Blog = 'Blog',
   Contact = 'Contact',
+  Auth = 'Auth',
+  Profile = 'Profile',
+  AdminPanel = 'AdminPanel',
 }
 
 export interface DrugInfo {
@@ -12,6 +17,24 @@ export interface DrugInfo {
   dosage: string;
   sideEffects: string[];
   substitutes: string[];
+}
+
+export interface SymptomSuggestion {
+  symptoms: string;
+  suggestedDrugs: {
+    name: string;
+    class: string;
+    reason: string;
+  }[];
+  disclaimer: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
 }
 
 export type InteractionSeverity = 'None' | 'Mild' | 'Moderate' | 'Severe';
@@ -28,4 +51,12 @@ export interface Article {
   imageUrl: string;
   snippet: string;
   content: string;
+}
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL: string;
+  role?: 'admin' | 'user';
 }

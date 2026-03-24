@@ -1,0 +1,133 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (Firebase Auth UID)
+    // Fields:
+    //   - uid: string (required) - The unique identifier of the user.
+    //   - email: string (required, email format) - The email address of the user.
+    //   - displayName: string (optional) - The display name of the user.
+    //   - photoURL: string (optional, uri format) - The URL of the user's profile photo.
+    //   - role: string (optional, enum: ['admin', 'user']) - The role of the user.
+    //
+    // Collection: bookmarks
+    // Document ID: {bookmarkId}
+    // Fields:
+    //   - userId: string (required) - The ID of the user who bookmarked the drug.
+    //   - drugName: string (required) - The name of the bookmarked drug.
+    //   - drugData: map (required) - The full data of the drug.
+    //   - timestamp: timestamp (required) - When the bookmark was created.
+    //
+    // Collection: search_history
+    // Document ID: {searchId}
+    // Fields:
+    //   - userId: string (required) - The ID of the user who performed the search.
+    //   - drugName: string (required) - The name of the drug searched.
+    //   - timestamp: timestamp (required) - When the search was performed.
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'email', 'displayName', 'photoURL', 'role']) &&
+             data.uid is string && data.uid.size() > 0 && data.uid.size() < 128 &&
+             data.email is string && isValidEmail(data.email) &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 100)) &&
+             (!('photoURL' in data) || (data.photoURL is string && isValidUrl(data.photoURL))) &&
+             (!('role' in data) || (data.role in ['admin', 'user']));
+    }
+
+    function isValidBookmark(data) {
+      return hasOnlyAllowedFields(['userId', 'drugName', 'drugData', 'timestamp']) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.drugName is string && data.drugName.size() > 0 && data.drugName.size() < 200 &&
+             data.drugData is map &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidSearchHistory(data) {
+      return hasOnlyAllowedFields(['userId', 'drugName', 'timestamp']) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.drugName is string && data.drugName.size() > 0 && data.drugName.size() < 200 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidQuizResult(data) {
+      return hasOnlyAllowedFields(['userId', 'score', 'totalQuestions', 'timestamp']) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.score is int && data.score >= 0 &&
+             data.totalQuestions is int && data.totalQuestions > 0 &&
+             data.timestamp is timestamp;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "szcamps@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.uid == request.auth.uid && (request.resource.data.role == 'user' || isAdmin());
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.uid == resource.data.uid && (request.resource.data.role == resource.data.role || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /bookmarks/{bookmarkId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isValidBookmark(request.resource.data);
+      allow update: if false; // Bookmarks are generally immutable or replaced
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /search_history/{searchId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isValidSearchHistory(request.resource.data);
+      allow update: if false;
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    match /quiz_results/{resultId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isValidQuizResult(request.resource.data);
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // Deny all other access by default.
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

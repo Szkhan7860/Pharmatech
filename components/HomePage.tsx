@@ -1,9 +1,16 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Pill, ShieldAlert, BookOpen, Mail, ArrowRight, Calculator } from 'lucide-react';
+import { Search, Pill, ShieldAlert, BookOpen, Mail, ArrowRight, Calculator, Activity, GraduationCap, Star } from 'lucide-react';
 import { getDrugInfo } from '../services/geminiService';
 import { DrugInfo, Page } from '../types';
+import { auth, db } from '../firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore';
+
+interface HomePageProps {
+  setCurrentPage: (page: Page) => void;
+}
 
 interface HomePageProps {
   setCurrentPage: (page: Page) => void;
@@ -41,7 +48,31 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
   const [drugInfo, setDrugInfo] = useState<DrugInfo | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const checkBookmark = async () => {
+      if (user && drugInfo) {
+        const q = query(
+          collection(db, 'bookmarks'),
+          where('userId', '==', user.uid),
+          where('drugName', '==', drugInfo.name)
+        );
+        const querySnapshot = await getDocs(q);
+        setIsBookmarked(!querySnapshot.empty);
+      }
+    };
+    checkBookmark();
+  }, [user, drugInfo]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,10 +85,53 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
     try {
       const info = await getDrugInfo(drugName);
       setDrugInfo(info);
+
+      // Save to search history if user is logged in
+      if (auth.currentUser) {
+        await addDoc(collection(db, 'search_history'), {
+          userId: auth.currentUser.uid,
+          drugName: info.name,
+          timestamp: serverTimestamp(),
+        });
+      }
     } catch (err) {
       setError('Failed to fetch drug information. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const toggleBookmark = async () => {
+    if (!user) {
+      setCurrentPage(Page.Auth);
+      return;
+    }
+
+    if (!drugInfo) return;
+
+    try {
+      if (isBookmarked) {
+        const q = query(
+          collection(db, 'bookmarks'),
+          where('userId', '==', user.uid),
+          where('drugName', '==', drugInfo.name)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (document) => {
+          await deleteDoc(doc(db, 'bookmarks', document.id));
+        });
+        setIsBookmarked(false);
+      } else {
+        await addDoc(collection(db, 'bookmarks'), {
+          userId: user.uid,
+          drugName: drugInfo.name,
+          drugData: drugInfo,
+          timestamp: serverTimestamp(),
+        });
+        setIsBookmarked(true);
+      }
+    } catch (err) {
+      console.error('Error toggling bookmark:', err);
     }
   };
 
@@ -73,7 +147,15 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-16 gap-6">
           <div className="space-y-2">
             <span className="text-xs font-black uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-500">Clinical Drug Profile</span>
-            <h2 className="text-4xl md:text-7xl font-black text-gray-900 dark:text-white tracking-tighter leading-tight">{info.name}</h2>
+            <div className="flex items-center gap-4">
+              <h2 className="text-4xl md:text-7xl font-black text-gray-900 dark:text-white tracking-tighter leading-tight">{info.name}</h2>
+              <button 
+                onClick={toggleBookmark}
+                className={`p-3 rounded-2xl transition-all duration-300 ${isBookmarked ? 'bg-yellow-400 text-white shadow-lg shadow-yellow-400/20' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-yellow-400'}`}
+              >
+                <Star className={`w-6 h-6 md:w-8 md:h-8 ${isBookmarked ? 'fill-current' : ''}`} />
+              </button>
+            </div>
           </div>
           <div className="self-start md:self-center flex items-center space-x-3 px-6 py-3 bg-cyan-50 dark:bg-cyan-900/30 rounded-2xl text-cyan-600 dark:text-cyan-400 font-black uppercase tracking-widest text-xs">
             <Pill className="w-5 h-5" />
@@ -168,10 +250,10 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl sm:text-6xl md:text-8xl font-black text-gray-900 dark:text-white tracking-tight leading-[1.1] md:leading-[0.9]"
+          className="text-4xl sm:text-6xl md:text-8xl font-black text-gray-900 dark:text-white tracking-tighter leading-tight"
         >
-          Your Gateway to <br className="hidden sm:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-700 dark:from-cyan-400 dark:to-blue-500">PharmaTech</span> Insights
+          Your Gateway to <br />
+          <span className="text-cyan-600 dark:text-cyan-500">PharmaTech</span> Insights
         </motion.h1>
         
         <motion.p 
@@ -256,11 +338,25 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
             color="bg-rose-600"
           />
           <FeatureCard 
+            onClick={() => setCurrentPage(Page.SymptomChecker)}
+            icon={<Activity />}
+            title="Symptom Checker"
+            description="Enter symptoms like 'Fever + headache' to get AI-powered first-line drug suggestions."
+            color="bg-blue-600"
+          />
+          <FeatureCard 
             onClick={() => setCurrentPage(Page.DoseCalculator)}
             icon={<Calculator />}
             title="Dose Calculator"
             description="Calculate pediatric and adult dosages using standard clinical formulas like BSA and Clark's Rule."
             color="bg-cyan-600"
+          />
+          <FeatureCard 
+            onClick={() => setCurrentPage(Page.Quiz)}
+            icon={<GraduationCap />}
+            title="Quiz Mode"
+            description="Test your pharmacology knowledge with AI-generated MCQs and clinical scenarios."
+            color="bg-purple-600"
           />
           <FeatureCard 
             onClick={() => setCurrentPage(Page.Blog)}
